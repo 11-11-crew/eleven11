@@ -18,6 +18,8 @@
 **Eleven11** is a web-based safety gear detection platform that uses a YOLOv8 model to identify **O₂ cylinders**, **toolkits**, and **fire extinguishers** from uploaded images or live video feeds.  
 It supports real-time detection, multilingual user interface, text-to-speech alerts, and a detection summary panel for enhanced usability in high-stakes environments like space stations.
 
+##  Demo
+https://drive.google.com/file/d/1OlAeJzVPzBKHzg_n6E8b3zvB2-Cpm8P9/view?usp=sharing
 
 ##  Features
 
