@@ -5,24 +5,7 @@ import { Github, ExternalLink, Users, Code, Brain, Rocket, Shield, Zap, Terminal
 const About = () => {
   const { t } = useTranslation();
   
-  const teamMembers = 
-[
-  {
-    name: 'RABBIKA AZMI',
-    role: 'TEAM LEADER · FULL STACK DEVELOPER',
-    description: 'Led the team and developed both frontend and backend systems, integrating object detection with robust APIs.'
-  },
-  {
-    name: 'NIHALIKA RAJ SHARMA',
-    role: 'DEBUGGING SPECIALIST · LEAD PRESENTER',
-    description: 'Handled critical debugging tasks and effectively presented the project, highlighting technical and functional aspects.'
-  },
-  {
-    name: 'PRIYANSHU BARIK',
-    role: 'UI DESIGNER · PRESENTATION CREATOR',
-    description: 'Crafted the user interface and created engaging presentation materials for showcasing the system.'
-  }
-];
+
 
   const techStack = [
     {
@@ -164,34 +147,25 @@ const About = () => {
           </div>
         </div>
 
-        {/* Team Section */}
+        {/* Project Impact Section */}
         <div className="mb-20">
           <div className="text-center mb-12">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-white font-mono">
-              {t('about.team.title')}
+              Project Impact
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto font-mono">
-              {t('about.team.description')}
+              ELEVEN11 is designed to make a real difference in space safety and mission assurance. By leveraging advanced AI and real-time detection, the project aims to set new standards for operational awareness and emergency preparedness in space environments.
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {teamMembers.map((member, index) => (
-              <div key={index} className="group bg-gray-900/20 backdrop-blur-sm border border-gray-800 p-8 hover:bg-gray-800/30 hover:border-gray-600 transition-all duration-500 transform hover:scale-105">
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-gray-800 border border-gray-700 flex items-center justify-center mx-auto mb-6 transform transition-all duration-500 group-hover:scale-110">
-                    <Users className="w-10 h-10 text-gray-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-gray-200 transition-colors duration-300 font-mono">
-                    {member.name}
-                  </h3>
-                  <p className="text-gray-400 font-semibold mb-4 font-mono">{member.role}</p>
-                  <p className="text-gray-300 leading-relaxed group-hover:text-gray-200 transition-colors duration-300 font-mono text-sm">
-                    {member.description}
-                  </p>
-                </div>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-gray-900/20 backdrop-blur-sm border border-gray-800 p-8">
+              <h3 className="text-2xl font-bold text-white mb-4 font-mono">Enhanced Safety</h3>
+              <p className="text-gray-300 font-mono">Instant identification of critical equipment helps astronauts and mission controllers respond faster to emergencies, reducing risk and improving outcomes.</p>
+            </div>
+            <div className="bg-gray-900/20 backdrop-blur-sm border border-gray-800 p-8">
+              <h3 className="text-2xl font-bold text-white mb-4 font-mono">Operational Efficiency</h3>
+              <p className="text-gray-300 font-mono">Automated monitoring and reporting streamline mission workflows, allowing teams to focus on high-priority tasks and innovation.</p>
+            </div>
           </div>
         </div>
 
@@ -226,7 +200,7 @@ const About = () => {
 
             <div className="text-center space-y-2 font-mono">
               <p className="text-gray-400">
-                <span className="text-white">SPECIAL_THANKS:</span> HackWithIndia - BuildWithDelhi2.0
+                <span className="text-white">SPECIAL_THANKS:</span> To All Our Supporters & Open Source Contributors
               </p>
               <p className="text-gray-400">
                 <span className="text-white">TEAM:</span> 11:11 Crew
