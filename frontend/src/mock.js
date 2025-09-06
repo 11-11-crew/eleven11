@@ -1,1 +1,0 @@
-// This file has been removed - no longer needed since we have real backend integration
