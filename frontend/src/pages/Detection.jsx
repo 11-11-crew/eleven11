@@ -6,7 +6,9 @@ import useTTS from '../hooks/useTTS';
 import AudioControl from '../components/AudioControl';
 import DetectionSummaryPanel from '../components/DetectionSummaryPanel';
 
+
 const Detection = () => {
+  // All hooks at the top
   const [selectedImage, setSelectedImage] = useState(null);
   const [detectionResults, setDetectionResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,20 +22,65 @@ const Detection = () => {
   const [realtimeDetections, setRealtimeDetections] = useState([]);
   const { t } = useTranslation();
   const { announceDetection, announceStatus, announceWarning, isSupported, isSpeaking } = useTTS();
-  
   const fileInputRef = useRef(null);
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const webcamCanvasRef = useRef(null);
   const detectionIntervalRef = useRef(null);
 
-  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+  // Use localhost for local backend (not Docker)
+  const BACKEND_URL = 'http://localhost:5000';
 
+  // Helper: send a webcam frame to backend for detection
+  const sendWebcamFrameForDetection = useCallback(async () => {
+    if (!webcamRef.current) return;
+    const imageSrc = webcamRef.current.getScreenshot();
+    if (!imageSrc) return;
+    // Convert base64 to blob
+    const res = await fetch(imageSrc);
+    const blob = await res.blob();
+    const file = new File([blob], 'webcam-live.jpg', { type: 'image/jpeg' });
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const response = await fetch(`${BACKEND_URL}/detect`, {
+        method: 'POST',
+        body: formData
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setDetectionResults(result);
+        setRealtimeDetections(result.detections || []);
+      }
+    } catch (err) {
+      // Optionally handle error
+    }
+  }, [webcamRef, BACKEND_URL]);
+
+  // Live detection: start interval when webcam is shown and real-time detection is enabled
   useEffect(() => {
-    // Simulate system initialization
+    if (showCamera && isRealTimeDetection) {
+      detectionIntervalRef.current = setInterval(() => {
+        sendWebcamFrameForDetection();
+      }, 1000); // 1 FPS, adjust as needed
+    } else {
+      if (detectionIntervalRef.current) {
+        clearInterval(detectionIntervalRef.current);
+        detectionIntervalRef.current = null;
+      }
+    }
+    return () => {
+      if (detectionIntervalRef.current) {
+        clearInterval(detectionIntervalRef.current);
+        detectionIntervalRef.current = null;
+      }
+    };
+  }, [showCamera, isRealTimeDetection, sendWebcamFrameForDetection]);
+
+  // Simulate system initialization
+  useEffect(() => {
     const initSequence = [t('detection.status.initializing'), t('detection.status.loading_models'), t('detection.status.calibrating'), t('detection.status.ready')];
     let currentStep = 0;
-    
     const initInterval = setInterval(() => {
       if (currentStep < initSequence.length - 1) {
         currentStep++;
@@ -42,7 +89,6 @@ const Detection = () => {
         clearInterval(initInterval);
       }
     }, 800);
-
     return () => clearInterval(initInterval);
   }, [t]);
 

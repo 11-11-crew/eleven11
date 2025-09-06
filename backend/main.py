@@ -11,7 +11,10 @@ import base64
 app = Flask(__name__)
 CORS(app)
 
+from flask_cors import CORS
+
 # Load YOLOv8 model - Docker-compatible path
+CORS(app)
 model_path = os.path.join("model_weights", "best.pt")
 if not os.path.exists(model_path):
     # Fallback to original path structure
@@ -27,51 +30,62 @@ else:
 
 @app.route('/detect', methods=['POST'])
 def detect_gear():
-    if 'image' not in request.files:
-        return jsonify({'error': 'No image file provided'}), 400
+    print('--- /detect endpoint called ---')
+    import traceback
+    try:
+        if model is None:
+            print('Model is not loaded!')
+            return jsonify({'error': 'Model not loaded on server'}), 500
 
-    image_file = request.files['image']
-    image_bytes = image_file.read()
-    image_np = np.array(Image.open(io.BytesIO(image_bytes)).convert('RGB'))
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image file provided'}), 400
 
-    # Run detection
-    results = model(image_np)[0]
+        image_file = request.files['image']
+        image_bytes = image_file.read()
+        image_np = np.array(Image.open(io.BytesIO(image_bytes)).convert('RGB'))
 
-    # Extract bounding boxes and labels
-    detections = []
-    annotated_img = image_np.copy()
+        # Run detection
+        results = model(image_np)[0]
 
-    for box in results.boxes:
-        x1, y1, x2, y2 = map(int, box.xyxy[0])
-        cls_id = int(box.cls[0])
-        label = model.names[cls_id]
-        conf = float(box.conf[0])
+        # Extract bounding boxes and labels
+        detections = []
+        annotated_img = image_np.copy()
 
-        # Convert x1,y1,x2,y2 to x,y,width,height format for frontend
-        width = x2 - x1
-        height = y2 - y1
+        for box in results.boxes:
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+            cls_id = int(box.cls[0])
+            label = model.names[cls_id]
+            conf = float(box.conf[0])
 
-        detections.append({
-            "class_name": label,
-            "confidence": conf,
-            "bbox": [x1, y1, width, height]
-        })
+            # Convert x1,y1,x2,y2 to x,y,width,height format for frontend
+            width = x2 - x1
+            height = y2 - y1
 
-        # Draw boxes on the image
-        color = (0, 255, 0)
-        cv2.rectangle(annotated_img, (x1, y1), (x2, y2), color, 2)
-        cv2.putText(annotated_img, f'{label} {conf:.2f}', (x1, y1 - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            detections.append({
+                "class_name": label,
+                "confidence": conf,
+                "bbox": [x1, y1, width, height]
+            })
 
-    # Save annotated image to buffer
-    _, img_encoded = cv2.imencode('.jpg', annotated_img)
-    img_bytes = img_encoded.tobytes()
+            # Draw boxes on the image
+            color = (0, 255, 0)
+            cv2.rectangle(annotated_img, (x1, y1), (x2, y2), color, 2)
+            cv2.putText(annotated_img, f'{label} {conf:.2f}', (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-    return {
-        "detections": detections,
-        "annotated_image": "data:image/jpeg;base64," + 
-            base64.b64encode(img_bytes).decode('utf-8')
-    }
+        # Save annotated image to buffer
+        _, img_encoded = cv2.imencode('.jpg', annotated_img)
+        img_bytes = img_encoded.tobytes()
+
+        return {
+            "detections": detections,
+            "annotated_image": "data:image/jpeg;base64," + 
+                base64.b64encode(img_bytes).decode('utf-8')
+        }
+    except Exception as e:
+        print('Exception in /detect:', e)
+        print(traceback.format_exc())
+        return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/health', methods=['GET'])
 def health_check():
@@ -94,4 +108,4 @@ def root():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"🚀 Starting server on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=True, use_reloader=False)
